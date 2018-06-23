@@ -15,7 +15,6 @@ def hello_world():
 def handle_my_custom_event(json):
   	#print( 'recived my event: ' + str(json))
   	socketio.emit('my response', json)
-  	send(json, broadcast = True)
 
 if(__name__ == '__main__'):
 	socketio.run(app)

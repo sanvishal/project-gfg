@@ -1,45 +1,32 @@
 var config = {
-      apiKey: ".",
-      authDomain: ".",
-      databaseURL: ".",
-      projectId: ".",
-      storageBucket: ".",
-      messagingSenderId: "."
+  apiKey: ".",
+  authDomain: ".",
+  databaseURL: ".",
+  projectId: ".",
+  storageBucket: ".",
+  messagingSenderId: "."
 }
 
 firebase.initializeApp(config)
 var database = firebase.database()
 var ref = firebase.database().ref("messages/");
-
-function clear_and_write(ref, data) {
-  //pass as json dict {key:'value'}
-  ref.set(data)
-}
-
-function clear_data(ref) {
-  ref.set({placeholder:'nothing'})
-}
-
-function push_data(ref,data) {
-  for(i = 0; i < data.length; i++) {
-    ref.push(data[i])
-  }
-}
-
-function update_data(ref,data) {
-  ref.update(data)
-}
-
-function get_structure(ref) {
-  ref.on("value", function(snapshot) {
-    console.log(snapshot.val())
-  }, function (error) {
-    console.log(error.code)
-  });
-}
-
-
 var socket = io.connect('http://' + document.domain + ':' + location.port)
+
+messages = []
+
+$(window).load(function() {
+  ref.on('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      msgtemp = childSnapshot.val()
+      md = {
+        name: msgtemp.name,
+        message: msgtemp.message
+      }
+      messages.push(md)
+    });
+  });
+  console.log(messages)
+});
 
 socket.on('connect', function() {
   socket.emit('my event', {
@@ -52,6 +39,7 @@ socket.on('connect', function() {
     if(user_name == '') {
       user_name = 'Anonymous'
     }
+    ref.push({name: user_name,message:user_input})
     if(user_input != '') {
       socket.emit('my event', {
         user_name : user_name,
@@ -61,6 +49,7 @@ socket.on('connect', function() {
     }
   })
 })
+
 
 socket.on('my response', function(msg) {
   username_fb = msg.user_name
@@ -72,4 +61,4 @@ socket.on('my response', function(msg) {
   }
 })
 
-console.log(ref)
+//ref.set({placeholder:"nothing"})
